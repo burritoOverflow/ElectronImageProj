@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 
 // set environment
 process.env.NODE_ENV = "development";
@@ -46,13 +46,26 @@ const menu = [
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: "ImageShrink",
-    width: 502,
-    height: 421,
+    width: 1000,
+    height: 506,
     icon: "./assets/icons/Icon_256x256.png",
     resizable: isDev ? true : false, // allow resizing only in development
     backgroundColor: "white",
-  }).loadURL(`file://${__dirname}/app/index.html`);
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+
+  mainWindow.loadURL(`file://${__dirname}/app/index.html`);
+
+  // open dev tools automatically if dev
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 }
+
+// on submit via form event: from renderer to main
+ipcMain.on("image:minimize", (e, options) => {});
 
 function createAboutWindow() {
   aboutWindow = new BrowserWindow({
