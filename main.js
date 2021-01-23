@@ -46,8 +46,8 @@ const menu = [
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: "ImageShrink",
-    width: 1000,
-    height: 800,
+    width: 502,
+    height: 421,
     icon: "./assets/icons/Icon_256x256.png",
     resizable: isDev ? true : false, // allow resizing only in development
     backgroundColor: "white",
