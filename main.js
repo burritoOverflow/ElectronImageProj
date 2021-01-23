@@ -1,4 +1,11 @@
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const path = require("path");
+const os = require("os");
+
+const { app, BrowserWindow, Menu, ipcMain, shell } = require("electron");
+const imagemin = require("imagemin");
+const imageminMozJpeg = require("imagemin-mozjpeg");
+const imageminPngQuant = require("imagemin-pngquant");
+const slash = require("slash");
 
 // set environment
 process.env.NODE_ENV = "development";
@@ -65,7 +72,26 @@ function createMainWindow() {
 }
 
 // on submit via form event: from renderer to main
-ipcMain.on("image:minimize", (e, options) => {});
+ipcMain.on("image:minimize", (e, options) => {
+  options.dest = path.join(os.homedir(), "/imageshrink");
+  shrinkImage(options);
+});
+
+async function shrinkImage({ imgPath, quality, dest }) {
+  try {
+    const pngQuality = quality / 100;
+    const files = await imagemin([slash(imgPath)], {
+      destination: dest,
+      plugins: [
+        imageminMozJpeg({ quality }),
+        imageminPngQuant([pngQuality, pngQuality]),
+      ],
+    });
+    shell.openPath(dest);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 function createAboutWindow() {
   aboutWindow = new BrowserWindow({
