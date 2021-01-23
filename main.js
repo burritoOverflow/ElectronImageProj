@@ -6,12 +6,13 @@ const imagemin = require("imagemin");
 const imageminMozJpeg = require("imagemin-mozjpeg");
 const imageminPngQuant = require("imagemin-pngquant");
 const slash = require("slash");
+const log = require("electron-log");
 
 // set environment
 process.env.NODE_ENV = "development";
 
 // environment determinations
-const isDev = process.env.NODE_ENV == "development" ? true : false;
+const isDev = process.env.NODE_ENV === "development" ? true : false;
 const isMac = process.platform === "darwin" ? true : false;
 
 let mainWindow;
@@ -53,8 +54,8 @@ const menu = [
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     title: "ImageShrink",
-    width: 1000,
-    height: 506,
+    width: 700,
+    height: 605,
     icon: "./assets/icons/Icon_256x256.png",
     resizable: isDev ? true : false, // allow resizing only in development
     backgroundColor: "white",
@@ -78,6 +79,12 @@ ipcMain.on("image:minimize", (e, options) => {
 });
 
 async function shrinkImage({ imgPath, quality, dest }) {
+  if (!validateExtensions(imgPath)) {
+    log.error("Invalid Extension Provided");
+    mainWindow.webContents.send("invalidinput");
+    return;
+  }
+
   try {
     const pngQuality = quality / 100;
     const files = await imagemin([slash(imgPath)], {
@@ -88,8 +95,22 @@ async function shrinkImage({ imgPath, quality, dest }) {
       ],
     });
     shell.openPath(dest);
+    mainWindow.webContents.send("image:done");
+    log.info(files);
   } catch (error) {
-    console.error(error);
+    log.error(error);
+  }
+}
+
+// *nix only
+function validateExtensions(fullPath) {
+  const validExtensions = [".jpg", ".jpeg", ".png"];
+  const extension = fullPath.slice(fullPath.indexOf("."), fullPath.length);
+
+  if (validExtensions.includes(extension)) {
+    return true;
+  } else {
+    return false;
   }
 }
 
