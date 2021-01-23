@@ -9,7 +9,7 @@ const slash = require("slash");
 const log = require("electron-log");
 
 // set environment
-process.env.NODE_ENV = "development";
+process.env.NODE_ENV = "production";
 
 // environment determinations
 const isDev = process.env.NODE_ENV === "development" ? true : false;

@@ -120,3 +120,6 @@ _TEMPLATE
 
 # mac
 .DS_STORE
+
+# builds
+release-builds/
